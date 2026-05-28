@@ -1,23 +1,20 @@
 import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { language = 'English', mode = 'Words', difficulty = 'Medium' } = body || {}
 
-  const apiKey = process.env.OPENAI_API_KEY
-  const baseURL = process.env.OPENAI_BASE_URL || 'https://api.llm7.io/v1'
+  const openAiKey = process.env.OPENAI_API_KEY
+  const openAiBaseURL = process.env.OPENAI_BASE_URL || 'https://api.llm7.io/v1'
+  const geminiKey = process.env.GEMINI_API_KEY
   
-  if (!apiKey) {
+  if (!openAiKey && !geminiKey) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'OPENAI_API_KEY is not configured'
+      statusMessage: 'No API Keys are configured'
     })
   }
-
-  const openai = new OpenAI({
-    apiKey,
-    baseURL
-  })
 
   const prompt = `Generate a typing practice text.
 Language: ${language}
@@ -29,19 +26,45 @@ Rules:
 - If Difficulty is Hard: Include numbers, complex punctuation, and advanced vocabulary.
 - Return ONLY the raw text itself, no markdown formatting, no quotes around the text, no explanations.`
 
+  let generatedText = ''
+
   try {
+    if (!openAiKey) throw new Error('OpenAI key missing, skipping to fallback.')
+
+    const openai = new OpenAI({
+      apiKey: openAiKey,
+      baseURL: openAiBaseURL
+    })
+
     const completion = await openai.chat.completions.create({
-      model: 'gpt-5.4-mini', // Update to your preferred model
+      model: 'gpt-5.4-mini', // using the model you updated to
       messages: [{ role: 'user', content: prompt }]
     })
 
-    const text = completion.choices[0].message.content?.trim() || ''
+    generatedText = completion.choices[0].message.content?.trim() || ''
+  } catch (openAiError: any) {
+    console.warn('OpenAI limit/error reached, falling back to Gemini:', openAiError.message)
     
-    return { text }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to generate text'
-    })
+    if (!geminiKey) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'OpenAI generation failed, and GEMINI_API_KEY is not available for fallback.'
+      })
+    }
+
+    try {
+      const genAI = new GoogleGenerativeAI(geminiKey)
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' })
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      generatedText = response.text().trim()
+    } catch (geminiError: any) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: `Generation failed. OpenAI error: ${openAiError.message} | Gemini error: ${geminiError.message}`
+      })
+    }
   }
+
+  return { text: generatedText }
 })
