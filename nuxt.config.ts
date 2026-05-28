@@ -13,4 +13,18 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  components: [
+    {
+      path: '~/features/components',
+      pathPrefix: false
+    }
+  ],
+  imports: {
+    dirs: [
+      'features/utils',
+      'features/stores',
+      'features/lib'
+    ]
+  },
+  serverDir: 'features/server', // Nuxt 3 supports `serverDir` to point to a custom server directory
 })

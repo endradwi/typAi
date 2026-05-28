@@ -100,8 +100,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RefreshCwIcon, ZapIcon, ChevronDownIcon } from 'lucide-vue-next'
-import { useConfigStore } from '~/stores/configStore'
-import { useTypingStore } from '~/stores/typingStore'
+import { useConfigStore } from '~/features/stores/configStore'
+import { useTypingStore } from '~/features/stores/typingStore'
 
 const config = useConfigStore()
 const typing = useTypingStore()

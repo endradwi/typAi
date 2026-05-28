@@ -2,6 +2,7 @@
 export default {
   content: [
     "./components/**/*.{js,vue,ts}",
+    "./features/**/*.{js,vue,ts}",
     "./layouts/**/*.vue",
     "./pages/**/*.vue",
     "./plugins/**/*.{js,ts}",

@@ -50,9 +50,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useConfigStore } from '~/stores/configStore'
-import { useTypingStore } from '~/stores/typingStore'
-import { useToast } from '~/components/ui/toast/use-toast'
+import { useConfigStore } from '~/features/stores/configStore'
+import { useTypingStore } from '~/features/stores/typingStore'
+import { useToast } from '~/features/components/ui/toast/use-toast'
 
 const config = useConfigStore()
 const typing = useTypingStore()

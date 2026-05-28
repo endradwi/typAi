@@ -48,7 +48,7 @@
 
 <script setup>
 import { RotateCcwIcon } from 'lucide-vue-next'
-import { useTypingStore } from '~/stores/typingStore'
+import { useTypingStore } from '~/features/stores/typingStore'
 const typing = useTypingStore()
 
 function restart() {

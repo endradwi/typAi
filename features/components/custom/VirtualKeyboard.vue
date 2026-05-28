@@ -16,7 +16,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useConfigStore } from '~/stores/configStore'
+import { useConfigStore } from '~/features/stores/configStore'
 
 const config = useConfigStore()
 
