@@ -1,20 +1,23 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { language = 'English', mode = 'Words', difficulty = 'Medium' } = body || {}
 
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.OPENAI_API_KEY
+  const baseURL = process.env.OPENAI_BASE_URL || 'https://api.llm7.io/v1'
   
   if (!apiKey) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'GEMINI_API_KEY is not configured'
+      statusMessage: 'OPENAI_API_KEY is not configured'
     })
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' })
+  const openai = new OpenAI({
+    apiKey,
+    baseURL
+  })
 
   const prompt = `Generate a typing practice text.
 Language: ${language}
@@ -27,9 +30,12 @@ Rules:
 - Return ONLY the raw text itself, no markdown formatting, no quotes around the text, no explanations.`
 
   try {
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text().trim()
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-5.4-mini', // Update to your preferred model
+      messages: [{ role: 'user', content: prompt }]
+    })
+
+    const text = completion.choices[0].message.content?.trim() || ''
     
     return { text }
   } catch (error: any) {
