@@ -16,7 +16,8 @@ export default defineNuxtConfig({
   components: [
     {
       path: '~/features/components',
-      pathPrefix: false
+      pathPrefix: false,
+      ignore: ['**/index.ts']
     }
   ],
   imports: {
